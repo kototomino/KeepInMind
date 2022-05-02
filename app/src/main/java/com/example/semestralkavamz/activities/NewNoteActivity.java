@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class NewNoteActivity extends AppCompatActivity {
+
     private ImageView imageBack;
     private EditText title;
     private EditText inputNote;
@@ -67,7 +68,7 @@ public class NewNoteActivity extends AppCompatActivity {
             return;
         }
         Note note = new Note();
-        note.setTitle(inputNote.getText().toString());
+        note.setTitle(title.getText().toString());
         note.setInputNote(inputNote.getText().toString());
         note.setTime(date.getText().toString());
 
