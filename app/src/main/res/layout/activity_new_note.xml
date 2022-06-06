@@ -36,6 +36,17 @@
                     android:src="@drawable/ic_baseline_close_24"></ImageView>
 
                 <ImageView
+                    android:id="@+id/removeNote"
+                    android:layout_width="@dimen/_20ssp"
+                    android:layout_height="@dimen/_20ssp"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginEnd="@dimen/_15sdp"
+                    android:background="@color/dark"
+                    android:src="@drawable/ic_baseline_delete_forever_24"
+                    android:visibility="visible"></ImageView>
+
+                <ImageView
                     android:id="@+id/submitNote"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -74,19 +85,36 @@
                 android:fontFamily="@font/ubuntu_medium"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_8sdp"></TextView>
+
+            <ImageView
+                android:id="@+id/removeImage"
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:layout_gravity="right"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                android:layout_marginBottom="@dimen/_10sdp"
+                android:background="@color/dark"
+                android:contentDescription="@string/app_title"
+                android:src="@drawable/ic_baseline_delete_forever_24"
+                android:visibility="gone"
+
+
+                ></ImageView>
+
             <ImageView
                 android:id="@+id/imageNote"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_12sdp"
                 android:layout_marginTop="@dimen/_12sdp"
                 android:layout_marginEnd="@dimen/_12sdp"
-                android:visibility="gone"
-                android:contentDescription="@string/app_title"
                 android:adjustViewBounds="true"
-                >
+                android:contentDescription="@string/app_title"
+                android:visibility="gone">
 
-        </ImageView>
+            </ImageView>
+
             <EditText
                 android:id="@+id/inputNote"
                 android:layout_width="match_parent"

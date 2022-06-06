@@ -18,6 +18,15 @@ public interface NoteDao {
     @Query("SELECT * FROM notes ORDER BY id DESC")
     List<Note> notesList();
 
+    @Query("SELECT * FROM notes ORDER BY title ASC")
+    List<Note> notesAZList();
+
+    @Query("SELECT * FROM notes ORDER BY title ASC")
+    List<Note> notesZAList();
+
+    @Query("SELECT * FROM notes ORDER BY time DESC")
+    List<Note> notesTimeList();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertNote(Note note);
 

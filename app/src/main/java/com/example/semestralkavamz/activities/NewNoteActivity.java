@@ -1,5 +1,9 @@
 package com.example.semestralkavamz.activities;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +24,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -51,6 +56,8 @@ public class NewNoteActivity extends AppCompatActivity {
     private final static int REQUEST_CODE_STORAGE_PERMISSION = 1;
     private final static int REQUEST_CODE_SELECT_IMAGE = 2;
 
+    private Note availableNote;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,10 +77,21 @@ public class NewNoteActivity extends AppCompatActivity {
         date = findViewById(R.id.dateTime);
         addNote = findViewById(R.id.submitNote);
         imageNote = findViewById(R.id.imageNote);
-        selectedImagePath = "";
         setTime();
         setStuff();
+        findViewById(R.id.removeImage).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                imageNote.setImageBitmap(null);
+                imageNote.setVisibility(View.GONE);
+                findViewById(R.id.removeImage).setVisibility(View.GONE);
+                selectedImagePath = "";
+            }
+        });
         initializeCustomDrawer();
+        handleOpenedNote();
+        deleteNote();
+
 
 
     }
@@ -88,6 +106,25 @@ public class NewNoteActivity extends AppCompatActivity {
     private void setTime() {
         date.setText(new SimpleDateFormat("EEEE, dd MMMM yyyy HH:mm a", Locale.getDefault()).format(new Date()));
     }
+    private void setViewOrUpdateNote() {
+        title.setText(availableNote.getTitle());
+        inputNote.setText(availableNote.getInputNote());
+        date.setText(availableNote.getTime());
+
+
+        if(availableNote.getImagePath() != null && availableNote.getImagePath().trim().isEmpty()) {
+            imageNote.setImageBitmap(BitmapFactory.decodeFile(availableNote.getImagePath()));
+            imageNote.setVisibility(View.VISIBLE);
+            findViewById(R.id.removeImage).setVisibility(View.VISIBLE);
+            selectedImagePath = availableNote.getImagePath();
+        }
+    }
+    private void handleOpenedNote() {
+        if (getIntent().getBooleanExtra("isViewOrUpdate",false)) {
+            availableNote = (Note) getIntent().getSerializableExtra("note");
+            setViewOrUpdateNote();
+        }
+    }
     private void saveNote() {
         if(title.getText().toString().trim().isEmpty()) {
             Toast.makeText(this, "Title is empty ... please insert title before saving note!",Toast.LENGTH_LONG).show();
@@ -100,6 +137,9 @@ public class NewNoteActivity extends AppCompatActivity {
         note.setColor(color);
         note.setImagePath(selectedImagePath);
 
+        if(availableNote != null) {
+            note.setId(availableNote.getId());
+        }
         @SuppressLint("StaticFieldLeak")
         class SaveNote extends AsyncTask<Void, Void, Void> {
 
@@ -246,7 +286,6 @@ public class NewNoteActivity extends AppCompatActivity {
                 fontUbuntu.setBackgroundResource(0);
                 fontKrona.setBackgroundResource(0);
                 fontRozha.setBackgroundResource(0);
-                inputNote.setTypeface(typeFace);
             }
         });
         drawerLayout.findViewById(R.id.font_amita).setOnClickListener(new View.OnClickListener() {
@@ -299,6 +338,7 @@ public class NewNoteActivity extends AppCompatActivity {
                 fontRozha.setBackgroundResource(0);
                 fontKrona.setBackgroundResource(0);
                 inputNote.setTypeface(typeFace);
+
             }
         });
         drawerLayout.findViewById(R.id.font_rozha).setOnClickListener(new View.OnClickListener() {
@@ -335,17 +375,32 @@ public class NewNoteActivity extends AppCompatActivity {
 
 
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode == REQUEST_CODE_STORAGE_PERMISSION && grantResults.length > 0) {
-            selectImage();
-        } else {
-            Toast.makeText(this,"Permission denied !",Toast.LENGTH_SHORT).show();
+        if(requestCode==1){
+            if(grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                selectImage();
+            }
+            else{
+                Toast.makeText(getApplicationContext(), "Permission Denied", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        if(requestCode == REQUEST_CODE_STORAGE_PERMISSION && grantResults.length > 0) {
+//            if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                selectImage();
+//            }
+//
+//        } else {
+//            Toast.makeText(this,"Permission denied !",Toast.LENGTH_SHORT).show();
+//        }
+//    }
+    
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -360,6 +415,8 @@ public class NewNoteActivity extends AppCompatActivity {
                         imageNote.setVisibility(View.VISIBLE);
 
                         selectedImagePath = getPathFromUri(selectedImageUri);
+                        findViewById(R.id.removeImage).setVisibility(View.VISIBLE);
+
                     }catch (Exception exception) {
                         Toast.makeText(this, exception.getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -367,6 +424,7 @@ public class NewNoteActivity extends AppCompatActivity {
             }
         }
     }
+
     private String getPathFromUri(Uri content) {
         String filePath;
         Cursor cursor = getContentResolver().query(content,null,null,null,null);
@@ -381,5 +439,31 @@ public class NewNoteActivity extends AppCompatActivity {
         }
         return filePath;
     }
+    public void deleteNote() {
+        findViewById(R.id.removeNote).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("TAG","KLIKOL SI");
+                @SuppressLint("StaticFieldLeak")
+                class DeleteNoteTask extends AsyncTask<Void,Void,Void> {
 
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        NotesDatabase.getDatabase(getApplicationContext()).noteDao().deleteNote(availableNote);
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void avoid) {
+                        super.onPostExecute(avoid);
+                        Intent intent = new Intent();
+                        intent.putExtra("isNoteDeleted",true);
+                        setResult(RESULT_OK,intent);
+                        finish();
+                    }
+                }
+                new DeleteNoteTask().execute();
+            }
+        });
+    }
 }
